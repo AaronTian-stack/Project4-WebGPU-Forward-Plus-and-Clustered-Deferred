@@ -14,9 +14,6 @@ struct FragmentInput
 fn main(in: FragmentInput) -> @location(0) vec4f
 {
     let diffuseColor = textureSample(diffuseTex, diffuseTexSampler, in.uv);
-    if (diffuseColor.a < 0.5f) {
-        discard;
-    }
 
     var totalLightContrib = vec3f(0, 0, 0);
     for (var lightIdx = 0u; lightIdx < lightSet.numLights; lightIdx++) {
@@ -25,5 +22,5 @@ fn main(in: FragmentInput) -> @location(0) vec4f
     }
 
     var finalColor = diffuseColor.rgb * totalLightContrib;
-    return vec4(finalColor, 1);
+    return vec4(finalColor, diffuseColor.a);
 }
