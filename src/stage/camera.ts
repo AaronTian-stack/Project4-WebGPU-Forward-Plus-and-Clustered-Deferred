@@ -1,9 +1,9 @@
-import { Mat4, mat4, Vec3, vec3 } from "wgpu-matrix";
+import { Mat4, mat4, vec2, Vec2, Vec3, vec3 } from "wgpu-matrix";
 import { toRadians } from "../math_util";
 import { device, canvas, fovYDegrees, aspectRatio } from "../renderer";
 
 class CameraUniforms {
-    readonly buffer = new ArrayBuffer(16 * 4);
+    readonly buffer = new ArrayBuffer((16*5 + 2 + 2) * 4);
     private readonly floatView = new Float32Array(this.buffer);
 
     set viewProjMat(mat: Float32Array) {
@@ -11,7 +11,35 @@ class CameraUniforms {
         this.floatView.set(mat, 0);
     }
 
+    set invViewProjMat(mat: Float32Array) {
+        this.floatView.set(mat, 16);
+    }
+
+    set projMat(mat: Float32Array) {
+        this.floatView.set(mat, 32);
+    }
+
+    set invProjMat(mat: Float32Array) {
+        this.floatView.set(mat, 48);
+    }
+
+    set viewMat(mat: Float32Array) {
+        this.floatView.set(mat, 64);
+    }
+
     // TODO-2: add extra functions to set values needed for light clustering here
+    set nearZ(value: number) {
+        this.floatView[80] = value;
+    }
+
+    set farZ(value: number) {
+        this.floatView[81] = value;
+    }
+
+    set resolution(value: Vec2) {
+        this.floatView[82] = value[0];
+        this.floatView[83] = value[1];
+    }
 }
 
 export class Camera {
@@ -136,7 +164,16 @@ export class Camera {
         // TODO-1.1: set `this.uniforms.viewProjMat` to the newly calculated view proj mat
         this.uniforms.viewProjMat = viewProjMat;
 
+        // Compute inverse view-projection matrix
+        this.uniforms.invViewProjMat = mat4.invert(viewProjMat);
+
         // TODO-2: write to extra buffers needed for light clustering here
+        this.uniforms.projMat = this.projMat;
+        this.uniforms.invProjMat = mat4.invert(this.projMat);
+        this.uniforms.viewMat = viewMat;
+        this.uniforms.nearZ = Camera.nearPlane;
+        this.uniforms.farZ = Camera.farPlane;
+        this.uniforms.resolution = vec2.create(canvas.width, canvas.height);
 
         // TODO-1.1: upload `this.uniforms.buffer` (host side) to `this.uniformsBuffer` (device side)
         // check `lights.ts` for examples of using `device.queue.writeBuffer()`
