@@ -88,7 +88,7 @@ fn buildAABB(clusterIdx: u32, globalIdx: vec3u) -> AABB {
     );
 
     // Bloat the AABB size to try and hide seams between clusters
-    let bloatRadius = ${lightRadius} * 0.2;
+    let bloatRadius = 2.0 * 0.2;
     let bloatedMin = aabbMin - vec3f(bloatRadius, bloatRadius, bloatRadius);
     let bloatedMax = aabbMax + vec3f(bloatRadius, bloatRadius, bloatRadius);
 
@@ -103,7 +103,7 @@ fn assignLights(clusterIdx: u32, aabb: AABB) {
     for (var lightIdx = 0u; lightIdx < lightSet.numLights; lightIdx++) {
         let light = lightSet.lights[lightIdx];
         let lightPosView = (cameraUniforms.viewMat * vec4f(light.pos, 1.0)).xyz;
-        if (sphereIntersectsAABB(lightPosView, ${lightRadius}, aabb)) {
+        if (sphereIntersectsAABB(lightPosView, 2.0, aabb)) {
             if (visibleLightCount < ${maxLightsPerCluster}) {
                 clusterSet.clusters[clusterIdx].lightIndices[visibleLightCount] = lightIdx;
                 visibleLightCount++;
