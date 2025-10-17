@@ -36,8 +36,8 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
 
         this.gBufferTextures = [];
         this.gBufferTextureViews = [];
-        const gBufferLabels: string[] = ["Albedo", "Normal"];
-        const gBufferFormats: GPUTextureFormat[] = ["rgba8unorm", "rgba16float"];
+        const gBufferLabels: string[] = ["Albedo(8) + Normal(24)"];
+        const gBufferFormats: GPUTextureFormat[] = ["rgba32uint"];
         for (let i = 0; i < gBufferFormats.length; i++) {
             const gBufferTexture = renderer.device.createTexture({
                 label: gBufferLabels[i],
@@ -92,26 +92,17 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
         this.materialBindGroupLayout = renderer.device.createBindGroupLayout({
             label: "gbuffer bind group layout",
             entries: [
-                { // Albedo
+                { // Albedo + Normal
                     binding: 0,
                     visibility: GPUShaderStage.FRAGMENT,
                     texture: {
-                        sampleType: "float",
-                        viewDimension: "2d",
-                        multisampled: false
-                    }
-                },
-                { // Normal
-                    binding: 1,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: "float",
+                        sampleType: "uint",
                         viewDimension: "2d",
                         multisampled: false
                     }
                 },
                 { // Depth
-                    binding: 2,
+                    binding: 1,
                     visibility: GPUShaderStage.FRAGMENT,
                     texture: {
                         sampleType: "depth",
@@ -132,10 +123,6 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
                 },
                 {
                     binding: 1,
-                    resource: this.gBufferTextureViews[1]
-                },
-                {
-                    binding: 2,
                     resource: this.depthTextureView
                 }
             ]
@@ -168,22 +155,6 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
                 targets: [
                     {
                         format: gBufferFormats[0],
-                        blend: {
-                            color: {
-                                srcFactor: "src-alpha",
-                                dstFactor: "one-minus-src-alpha",
-                                operation: "add"
-                            },
-                            alpha: {
-                                srcFactor: "one",
-                                dstFactor: "one-minus-src-alpha",
-                                operation: "add"
-                            }
-                        }
-                    },
-                    {
-                        format: gBufferFormats[1],
-                        blend: undefined
                     }
                 ]
             },
@@ -263,12 +234,6 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
             colorAttachments: [
                 {
                     view: this.gBufferTextureViews[0],
-                    clearValue: [0, 0, 0, 0],
-                    loadOp: "clear",
-                    storeOp: "store"
-                },
-                {
-                    view: this.gBufferTextureViews[1],
                     clearValue: [0, 0, 0, 0],
                     loadOp: "clear",
                     storeOp: "store"

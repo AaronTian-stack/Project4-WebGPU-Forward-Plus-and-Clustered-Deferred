@@ -6,9 +6,8 @@
 @group(${bindGroup_scene}) @binding(1) var<storage, read> lightSet: LightSet;
 @group(${bindGroup_scene}) @binding(2) var<storage, read_write> clusterSet: ClusterSet;
 
-@group(1) @binding(0) var albedoTexture: texture_2d<f32>;
-@group(1) @binding(1) var normalTexture: texture_2d<f32>;
-@group(1) @binding(2) var depthTexture: texture_depth_2d;
+@group(1) @binding(0) var albedoNormalTexture: texture_2d<u32>;
+@group(1) @binding(1) var depthTexture: texture_depth_2d;
 
 fn reconstructPosition(uv: vec2f, depth: f32) -> vec3f {
     var ndc = vec4f(uv * 2.0 - 1.0, depth, 1.0);
@@ -28,8 +27,13 @@ fn main(in: FragmentInput) -> @location(0) vec4f {
 
     let pixelPosition = vec2i(uv * cameraUniforms.resolution);
 
-    let albedo = textureLoad(albedoTexture, pixelPosition, 0);
-    let normal = textureLoad(normalTexture, pixelPosition, 0);
+    let rawValue = textureLoad(albedoNormalTexture, pixelPosition, 0);
+    let albedo = unpack4x8unorm(rawValue.x);
+    let normal = vec3<f32>(
+        bitcast<f32>(rawValue.y),
+        bitcast<f32>(rawValue.z),
+        bitcast<f32>(rawValue.w)
+    );
 
     let depth: f32 = textureLoad(depthTexture, pixelPosition, 0);
 
