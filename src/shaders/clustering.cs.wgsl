@@ -26,8 +26,6 @@
 @group(0) @binding(1) var<storage, read> lightSet: LightSet;
 @group(0) @binding(2) var<storage, read_write> clusterSet: ClusterSet;
 
-var<workgroup> sharedLights: array<Light, ${clusterWorkgroupSize}>;
-
 fn screenToView(screenPos: vec2f) -> vec4f {
     var ndcPos = vec4f(screenPos / cameraUniforms.resolution * 2.0 - 1.0, 0.0, 1.0);
     ndcPos.y *= -1; // +Y up
