@@ -88,7 +88,7 @@ fn buildAABB(clusterIdx: u32, globalIdx: vec3u) -> AABB {
     );
 
     // Bloat the AABB size to try and hide seams between clusters
-    let bloatRadius = ${lightRadius} * 0.1;
+    let bloatRadius = ${lightRadius} * 0.2;
     let bloatedMin = aabbMin - vec3f(bloatRadius, bloatRadius, bloatRadius);
     let bloatedMax = aabbMax + vec3f(bloatRadius, bloatRadius, bloatRadius);
 
