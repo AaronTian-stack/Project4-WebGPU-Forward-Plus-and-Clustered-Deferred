@@ -112,7 +112,7 @@ fn assignLights(clusterIdx: u32, aabb: AABB) {
     clusterSet.clusters[clusterIdx].numLights = visibleLightCount;
 }
 
-@compute @workgroup_size(${32})
+@compute @workgroup_size(32)
 fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
     if (globalIdx.x >= ${numClustersX} || globalIdx.y >= ${numClustersY} || globalIdx.z >= ${numClustersZ}) {
         return;
