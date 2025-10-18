@@ -186,7 +186,12 @@ export class Lights {
         const computePass = encoder.beginComputePass();
         computePass.setPipeline(this.clusteringComputePipeline);
         computePass.setBindGroup(0, this.lightClusteringComputeBindGroup);
-        computePass.dispatchWorkgroups(shaders.constants.numClustersX, shaders.constants.numClustersY, shaders.constants.numClustersZ);
+        let c = 2;
+        computePass.dispatchWorkgroups(
+            Math.ceil(shaders.constants.numClustersX / c),
+            Math.ceil(shaders.constants.numClustersY / c),
+            Math.ceil(shaders.constants.numClustersZ / c)
+        );
         computePass.end();
     }
 

@@ -65,7 +65,7 @@ In my implementation, I use a single color attachment for the G-buffer that cont
 
 ## Performance Analysis
 
-Timings are taken on a 3440x1440p 100 Hz monitor, which causes the frame time to cap at a minimum of 10 ms. **Cluster dimensions are 16x9x24, the workgroup size is 32, and each cluster can store 1024 light indices unless otherwise specified.** Lower frametime is better.
+Timings are taken on a 3440x1440p 100 Hz monitor, which causes the frame time to cap at a minimum of 10 ms. **Cluster dimensions are 16x9x24, the workgroup size is 1x1x1, and each cluster can store 1024 light indices unless otherwise specified.** Lower frametime is better.
 
 For the workgroup size and cluster dimension tests, I use 4000 lights, the reasoning being that this was the light count that started to cause the clustered deferred implementation to drop below 10 ms. Thus we can see performance differences while not being too compute bottlenecked.
 
@@ -81,7 +81,7 @@ Depending on the kind of rendering you want to do, a forward rendering approach 
 
 ![workgroup](img/workgroup.png)
 
-Changing the workgroup size used in the clustering compute shader does not really have a significant impact on overall performance. I suspect that the frametime is primarily bound by the pixel shading, which causes any difference in the clustering compute shader to not be very noticeable. Intuitively, clusters that are close to each other should have similar lights assigned to them due to 3D spatial locality, so it should be relatively coherent, and a larger workgroup size may take advantage of that, but we don't really see that across the board here.
+Changing the workgroup size used in the clustering compute shader does not really have a significant impact on overall performance. I suspect that the frametime is primarily bound by the pixel shading, which causes any difference in the clustering compute shader to not be very noticeable. Intuitively, clusters that are close to each other should have similar lights assigned to them due to 3D spatial locality, so it should be relatively coherent, and a larger workgroup size may take advantage of that, but we don't really see that across the board here. WebGPU also has a very small limit to the workgroup size (256 invocations) which is not very flexible. It probably would be worth testing with non-cubic sizes as well to try and match the cluster dimensions more but I did not do that here.
 
 ### Cluster Dimensions
 
